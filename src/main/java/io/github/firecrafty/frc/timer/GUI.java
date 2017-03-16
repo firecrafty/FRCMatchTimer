@@ -1,31 +1,33 @@
 package io.github.firecrafty.frc.timer;
 
+import io.github.firecrafty.frc.timer.utils.Audio;
+import io.github.firecrafty.frc.timer.utils.Counter;
+import io.github.firecrafty.frc.timer.utils.MatchTimer;
+import io.github.firecrafty.frc.timer.utils.State;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.NumberFormat;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author firecrafty
  */
 public class GUI extends JFrame {
-    private long remaining = 15000;
-    private long lastUpdate;
-    private int scoredGearCount = 0;
-    private int droppedGearCount = 0;
-    private boolean useAutonomous = false;
-    private static GUI instance_ = new GUI();
+    private MatchTimer matchTimer = new MatchTimer();
+    private Counter counter = new Counter();
 
-    State timerState = State.RESET;
+    private static GUI instance_ = new GUI();
 
     NumberFormat format;
     JPanel mainPanel = new JPanel(new GridBagLayout());
     JLabel timeLabel = new JLabel();
 
     JPanel buttonPanel = new JPanel(new GridBagLayout());
-    JButton startStopButton = new JButton();
+    JButton startStopButton = new JButton("Start");
     JCheckBox autonomousCheck = new JCheckBox("Use autonomous?");
     JCheckBox soundCheck = new JCheckBox("Play match noises?");
     JButton resetButton = new JButton("Reset");
@@ -38,7 +40,7 @@ public class GUI extends JFrame {
 
     GridBagConstraints gbc = new GridBagConstraints();
 
-    Timer timer;
+    Timer timer = new Timer();
 
     public static GUI getInstance() {
         return instance_;
@@ -47,44 +49,18 @@ public class GUI extends JFrame {
     private GUI() {
         format = NumberFormat.getNumberInstance();
         format.setMinimumIntegerDigits(2);
-        setTimerState(State.RESET);
+        addComponents();
         setTitle("FRC Match Timer");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
-        timer = new Timer(1000, new ActionListener() {
+        updateDisplay();
+        timer.scheduleAtFixedRate(new TimerTask() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void run() {
                 updateDisplay();
             }
-        });
-        timer.setInitialDelay(0);
-        resetTimer();
+        }, 0, 100);
         pack();
-    }
-
-    public void setTimerState(State state) {
-        State previousState = this.timerState;
-        this.timerState = state;
-        switch(this.timerState) {
-            case RUNNING:
-                startStopButton.setText("Stop");
-                break;
-            case STOPPED:
-            case RESET:
-                startStopButton.setText("Start");
-                break;
-        }
-        switch(previousState) {
-            case RESET:
-                switch(state) {
-                    case RUNNING:
-
-                }
-        }
-    }
-
-    public State getTimerState() {
-        return timerState;
     }
 
     private void createButtonPanel() {
@@ -120,95 +96,55 @@ public class GUI extends JFrame {
         startStopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(timerState == State.RUNNING) {
-                    setTimerState(State.STOPPED);
-                    stopTimer();
+                if(matchTimer.getState() == State.RUNNING) {
+                    matchTimer.setState(State.STOPPED);
+                    startStopButton.setText("Start");
                 } else {
-                    if(timerState == State.RESET) {
-                        remaining = useAutonomous ? 150000 : 135000;
+                    if(matchTimer.isUsingAutonomous()) {
+                        Audio.playSound("start_auto.wav");
+                    } else {
+                        Audio.playSound("start_tele.wav");
                     }
-                    setTimerState(State.RUNNING);
-                    startTimer();
+                    matchTimer.setState(State.RUNNING);
+                    startStopButton.setText("Stop");
                 }
             }
         });
         scoredGearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                scoredGearCount++;
-                updateCounters();
+                scoredGearField.setText(Integer.toString(counter.incrementGearsScored()));
             }
         });
         droppedGearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                droppedGearCount++;
-                updateCounters();
+                droppedGearField.setText(Integer.toString(counter.incrementGearsDropped()));
             }
         });
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setTimerState(State.RESET);
-                scoredGearCount = 0;
-                droppedGearCount = 0;
+                counter.resetCounters();
                 updateCounters();
-                resetTimer();
-
+                matchTimer.setState(State.RESET);
             }
         });
         autonomousCheck.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                useAutonomous = autonomousCheck.isSelected();
-                resetTimer();
+                matchTimer.useAutonomous(autonomousCheck.isSelected());
             }
         });
     }
 
-    private void updateCounters() {
-        scoredGearField.setText(Integer.toString(scoredGearCount));
-        droppedGearField.setText(Integer.toString(droppedGearCount));
-    }
-
     public void updateDisplay() {
-        long now = System.currentTimeMillis();
-        long elapsed = now - lastUpdate;
-        remaining -= elapsed;
-        lastUpdate = now;
-
-        if(remaining < 0) remaining = 0;
-
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(remaining);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(remaining - TimeUnit.MINUTES.toMillis(minutes));
-        //int minutes = (int)(remaining/60000);
+        long[] timeRemaining = matchTimer.getTimeRemaining();
         //int seconds = (int)((remaining)% 1000);
-        timeLabel.setText(format.format(minutes) + ":" + format.format(seconds));
-        if(remaining == 0) {
-            timer.stop();
+        timeLabel.setText(format.format(timeRemaining[0]) + ":" + format.format(timeRemaining[1]));
+        if(timeRemaining[0] == 0 && timeRemaining[1] == 0) {
+            Audio.playSound("end.wav");
         }
-
-    }
-
-    void startTimer() {
-        // Restore the time we're counting down from and restart the timer.
-        lastUpdate = System.currentTimeMillis();
-        timer.start(); // Start the timer
-    }
-
-    void stopTimer() {
-        // Subtract elapsed time from the remaining time and stop timing
-        long now = System.currentTimeMillis();
-        remaining -= (now - lastUpdate);
-        timer.stop(); // Stop the timer
-    }
-
-    void resetTimer() {
-        stopTimer();
-        remaining = useAutonomous ? 150000 : 135000;
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(remaining);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(remaining - TimeUnit.MINUTES.toMillis(minutes));
-        timeLabel.setText(format.format(minutes) + ":" + format.format(seconds));
 
     }
     private void addComponents() {
@@ -224,6 +160,10 @@ public class GUI extends JFrame {
         gbc.gridy = 2;
         mainPanel.add(helperPanel, gbc);
         getContentPane().add(mainPanel);
+    }
+    public void updateCounters() {
+        scoredGearField.setText(Integer.toString(counter.getGearsScored()));
+        droppedGearField.setText(Integer.toString(counter.getGearsDropped()));
     }
 
 
