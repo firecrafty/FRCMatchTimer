@@ -1,2 +1,2 @@
-# FRCPracticeTimer
+# FRCMatchTimer
 A timer and scoring(ish) tool for First SteamWorks

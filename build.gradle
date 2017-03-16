@@ -1,0 +1,13 @@
+group 'io.github.firecrafty.frc.timer'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'application'
+
+mainClassName = "io.github.firecrafty.frc.timer.FRCMatchTimer"
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
