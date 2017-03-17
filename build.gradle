@@ -1,9 +1,14 @@
-group 'io.github.firecrafty.frc.timer'
-version '1.0-SNAPSHOT'
+
+plugins {
+    id 'edu.sc.seis.launch4j' version '2.3.0'
+}
 
 apply plugin: 'application'
+group 'io.github.firecrafty.frc.timer'
+version 'v1.0'
 
 mainClassName = "io.github.firecrafty.frc.timer.FRCMatchTimer"
+
 repositories {
     mavenCentral()
 }
@@ -17,4 +22,9 @@ jar {
                 'Main-Class': 'io.github.firecrafty.frc.timer.FRCMatchTimer'
         )
     }
+}
+
+launch4j {
+    mainClassName = 'io.github.firecrafty.frc.timer.FRCMatchTimer'
+    //icon = 'icons/myApp.ico'
 }
