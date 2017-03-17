@@ -1,5 +1,7 @@
 package io.github.firecrafty.frc.timer.utils;
 
+import io.github.firecrafty.frc.timer.FRCMatchTimer;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -15,11 +17,11 @@ public class Audio {
             public void run() {
                 try {
                     Clip clip = AudioSystem.getClip();
-                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream("resources/sounds/" + url));
+                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(FRCMatchTimer.class.getResourceAsStream("/sounds/" + url));
                     clip.open(inputStream);
                     clip.start();
                 } catch(Exception e) {
-                    System.err.println(e.getMessage());
+                    e.printStackTrace();
                 }
             }
         }).start();

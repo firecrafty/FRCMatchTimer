@@ -53,14 +53,16 @@ public class GUI extends JFrame {
         setTitle("FRC Match Timer");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
+        Toolkit tk = Toolkit.getDefaultToolkit();
+        setExtendedState(Frame.MAXIMIZED_BOTH);
         updateDisplay();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 updateDisplay();
             }
-        }, 0, 100);
-        pack();
+        }, 0, 200);
+
     }
 
     private void createButtonPanel() {
@@ -71,6 +73,7 @@ public class GUI extends JFrame {
         gbc.gridx = 1;
         buttonPanel.add(autonomousCheck, gbc);
         gbc.gridx = 2;
+        soundCheck.setSelected(true);
         buttonPanel.add(soundCheck, gbc);
         gbc.gridx = 3;
         buttonPanel.add(resetButton, gbc);
@@ -100,10 +103,12 @@ public class GUI extends JFrame {
                     matchTimer.setState(State.STOPPED);
                     startStopButton.setText("Start");
                 } else {
-                    if(matchTimer.isUsingAutonomous()) {
-                        Audio.playSound("start_auto.wav");
-                    } else {
-                        Audio.playSound("start_tele.wav");
+                    if(soundCheck.isSelected()) {
+                        if(matchTimer.isUsingAutonomous()) {
+                            Audio.playSound("start_auto.wav");
+                        } else {
+                            Audio.playSound("start_tele.wav");
+                        }
                     }
                     matchTimer.setState(State.RUNNING);
                     startStopButton.setText("Stop");
@@ -128,12 +133,19 @@ public class GUI extends JFrame {
                 counter.resetCounters();
                 updateCounters();
                 matchTimer.setState(State.RESET);
+                startStopButton.setText("Start");
             }
         });
         autonomousCheck.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 matchTimer.useAutonomous(autonomousCheck.isSelected());
+            }
+        });
+        soundCheck.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
             }
         });
     }
@@ -153,7 +165,7 @@ public class GUI extends JFrame {
         addActionListeners();
         gbc.gridx = 0;
         gbc.gridy = 0;
-        timeLabel.setFont(new Font(timeLabel.getFont().getName(), Font.PLAIN, 200));
+        timeLabel.setFont(new Font(timeLabel.getFont().getName(), Font.PLAIN, 400));
         mainPanel.add(timeLabel, gbc);
         gbc.gridy = 1;
         mainPanel.add(buttonPanel, gbc);

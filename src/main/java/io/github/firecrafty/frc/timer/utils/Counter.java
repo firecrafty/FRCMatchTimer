@@ -15,7 +15,7 @@ public class Counter {
         return gearsDropped;
     }
     public int incrementGearsScored() {
-        return ++gearsDropped;
+        return ++gearsScored;
     }
     public int incrementGearsDropped() {
         return ++gearsDropped;
