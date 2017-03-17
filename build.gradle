@@ -25,6 +25,9 @@ jar {
 }
 
 launch4j {
+    outfile = project.name + '-' + project.version + '.exe'
+    companyName =  "Ryan Blue"
+    copyright = 'Copyright 2017 Ryan Blue'
     mainClassName = 'io.github.firecrafty.frc.timer.FRCMatchTimer'
     //icon = 'icons/myApp.ico'
 }
