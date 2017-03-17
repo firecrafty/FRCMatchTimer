@@ -3,7 +3,7 @@
  *
  * This file is part of FRCMatchTimer (https://github.com/firecrafty/FRCMatchTimer)
  *
- * Copyright (C) 2017 firecrafty
+ * Copyright (C) 2017 Ryan Blue
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

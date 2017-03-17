@@ -3,7 +3,7 @@
  *
  * This file is part of FRCMatchTimer (https://github.com/firecrafty/FRCMatchTimer)
  *
- * Copyright (C) 2017 firecrafty
+ * Copyright (C) 2017 Ryan Blue
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,9 @@ public class GUI extends JFrame {
         setTitle("FRC Match Timer");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
-        setExtendedState(Frame.MAXIMIZED_BOTH);
+        setMinimumSize(new Dimension(1029, 589));
+        // Still debating if I want this
+        // setExtendedState(Frame.MAXIMIZED_BOTH);
         updateDisplay();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -75,7 +77,6 @@ public class GUI extends JFrame {
                 updateDisplay();
             }
         }, 0, 200);
-
     }
 
     private void addComponents() {
