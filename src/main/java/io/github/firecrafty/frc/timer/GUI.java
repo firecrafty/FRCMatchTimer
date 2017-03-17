@@ -56,6 +56,9 @@ public class GUI extends JFrame {
     Timer timer = new Timer();
     private MatchTimer matchTimer = new MatchTimer();
     private Counter counter = new Counter();
+    private boolean startSoundPlayed;
+    private boolean teleSoundPlayed;
+    private boolean endSoundPlayed;
 
     private GUI() {
         format = NumberFormat.getNumberInstance();
@@ -94,8 +97,15 @@ public class GUI extends JFrame {
         long[] timeRemaining = matchTimer.getTimeRemaining();
         //int seconds = (int)((remaining)% 1000);
         timeLabel.setText(format.format(timeRemaining[0]) + ":" + format.format(timeRemaining[1]));
-        if(timeRemaining[0] == 0 && timeRemaining[1] == 0) {
-            Audio.playSound("end.wav");
+        if(soundCheck.isSelected()) {
+            if((timeRemaining[0] == 2 && timeRemaining[1] == 15) && (matchTimer.isUsingAutonomous() && !teleSoundPlayed)) {
+                Audio.playSound("start_tele.wav");
+                teleSoundPlayed = true;
+            }
+            if((timeRemaining[0] == 0 && timeRemaining[1] == 0) && !endSoundPlayed) {
+                Audio.playSound("end.wav");
+                endSoundPlayed = true;
+            }
         }
 
     }
@@ -138,12 +148,13 @@ public class GUI extends JFrame {
                     matchTimer.setState(State.STOPPED);
                     startStopButton.setText("Start");
                 } else {
-                    if(soundCheck.isSelected()) {
+                    if(soundCheck.isSelected() && !startSoundPlayed) {
                         if(matchTimer.isUsingAutonomous()) {
                             Audio.playSound("start_auto.wav");
                         } else {
                             Audio.playSound("start_tele.wav");
                         }
+                        startSoundPlayed = true;
                     }
                     matchTimer.setState(State.RUNNING);
                     startStopButton.setText("Stop");
@@ -168,6 +179,9 @@ public class GUI extends JFrame {
                 counter.resetCounters();
                 updateCounters();
                 matchTimer.setState(State.RESET);
+                startSoundPlayed = false;
+                teleSoundPlayed = false;
+                endSoundPlayed = false;
                 startStopButton.setText("Start");
             }
         });
