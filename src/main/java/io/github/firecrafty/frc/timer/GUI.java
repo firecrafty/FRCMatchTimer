@@ -1,3 +1,24 @@
+/*
+ * GUI.java
+ *
+ * This file is part of FRCMatchTimer (https://github.com/firecrafty/FRCMatchTimer)
+ *
+ * Copyright (C) 2017 firecrafty
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package io.github.firecrafty.frc.timer;
 
 import io.github.firecrafty.frc.timer.utils.Audio;
@@ -17,34 +38,24 @@ import java.util.TimerTask;
  * @author firecrafty
  */
 public class GUI extends JFrame {
-    private MatchTimer matchTimer = new MatchTimer();
-    private Counter counter = new Counter();
-
     private static GUI instance_ = new GUI();
-
     NumberFormat format;
     JPanel mainPanel = new JPanel(new GridBagLayout());
     JLabel timeLabel = new JLabel();
-
     JPanel buttonPanel = new JPanel(new GridBagLayout());
     JButton startStopButton = new JButton("Start");
     JCheckBox autonomousCheck = new JCheckBox("Use autonomous?");
     JCheckBox soundCheck = new JCheckBox("Play match noises?");
     JButton resetButton = new JButton("Reset");
-
     JPanel helperPanel = new JPanel(new GridBagLayout());
     JButton scoredGearButton = new JButton("Scored Gear");
     JButton droppedGearButton = new JButton("Dropped Gear");
     JTextField scoredGearField = new JTextField("0", 2);
     JTextField droppedGearField = new JTextField("0", 2);
-
     GridBagConstraints gbc = new GridBagConstraints();
-
     Timer timer = new Timer();
-
-    public static GUI getInstance() {
-        return instance_;
-    }
+    private MatchTimer matchTimer = new MatchTimer();
+    private Counter counter = new Counter();
 
     private GUI() {
         format = NumberFormat.getNumberInstance();
@@ -53,7 +64,6 @@ public class GUI extends JFrame {
         setTitle("FRC Match Timer");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
-        Toolkit tk = Toolkit.getDefaultToolkit();
         setExtendedState(Frame.MAXIMIZED_BOTH);
         updateDisplay();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -62,6 +72,31 @@ public class GUI extends JFrame {
                 updateDisplay();
             }
         }, 0, 200);
+
+    }
+
+    private void addComponents() {
+        createButtonPanel();
+        createHelperPanel();
+        addActionListeners();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        timeLabel.setFont(new Font(timeLabel.getFont().getName(), Font.PLAIN, 400));
+        mainPanel.add(timeLabel, gbc);
+        gbc.gridy = 1;
+        mainPanel.add(buttonPanel, gbc);
+        gbc.gridy = 2;
+        mainPanel.add(helperPanel, gbc);
+        getContentPane().add(mainPanel);
+    }
+
+    public void updateDisplay() {
+        long[] timeRemaining = matchTimer.getTimeRemaining();
+        //int seconds = (int)((remaining)% 1000);
+        timeLabel.setText(format.format(timeRemaining[0]) + ":" + format.format(timeRemaining[1]));
+        if(timeRemaining[0] == 0 && timeRemaining[1] == 0) {
+            Audio.playSound("end.wav");
+        }
 
     }
 
@@ -150,34 +185,14 @@ public class GUI extends JFrame {
         });
     }
 
-    public void updateDisplay() {
-        long[] timeRemaining = matchTimer.getTimeRemaining();
-        //int seconds = (int)((remaining)% 1000);
-        timeLabel.setText(format.format(timeRemaining[0]) + ":" + format.format(timeRemaining[1]));
-        if(timeRemaining[0] == 0 && timeRemaining[1] == 0) {
-            Audio.playSound("end.wav");
-        }
-
-    }
-    private void addComponents() {
-        createButtonPanel();
-        createHelperPanel();
-        addActionListeners();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        timeLabel.setFont(new Font(timeLabel.getFont().getName(), Font.PLAIN, 400));
-        mainPanel.add(timeLabel, gbc);
-        gbc.gridy = 1;
-        mainPanel.add(buttonPanel, gbc);
-        gbc.gridy = 2;
-        mainPanel.add(helperPanel, gbc);
-        getContentPane().add(mainPanel);
-    }
     public void updateCounters() {
         scoredGearField.setText(Integer.toString(counter.getGearsScored()));
         droppedGearField.setText(Integer.toString(counter.getGearsDropped()));
     }
 
+    public static GUI getInstance() {
+        return instance_;
+    }
 
 
 }
