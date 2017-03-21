@@ -34,18 +34,19 @@ public class MatchTimer {
     Timer timer;
     State state = State.RESET;
     private long[] time = {2, 15};
-    private long duration;
-    private long remaining = 135000;
+    private long autonomousDuration = 150000;
+    private long teleopOnlyDuration = 135000;
+    private long remaining = teleopOnlyDuration;
     private long lastUpdate;
 
     public MatchTimer() {
-        timer = new Timer(500, new ActionListener() {
+        timer = new Timer(100, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateTimer();
             }
         });
-        timer.setInitialDelay(400);
+        //timer.setInitialDelay(400);
     }
 
     private void updateTimer() {
@@ -56,6 +57,9 @@ public class MatchTimer {
 
         if(remaining < 0) remaining = 0;
 
+        updateTimeRemaining();
+    }
+    private void updateTimeRemaining() {
         time[0] = TimeUnit.MILLISECONDS.toMinutes(remaining);
         time[1] = TimeUnit.MILLISECONDS.toSeconds(remaining - TimeUnit.MINUTES.toMillis(time[0]));
     }
@@ -121,9 +125,8 @@ public class MatchTimer {
 
     public void resetTimer() {
         stopTimer();
-        remaining = autonomous ? 150000 : 135000;
-        time[0] = TimeUnit.MILLISECONDS.toMinutes(remaining);
-        time[1] = TimeUnit.MILLISECONDS.toSeconds(remaining - TimeUnit.MINUTES.toMillis(time[0]));
+        remaining = autonomous ? autonomousDuration : teleopOnlyDuration;
+        updateTimeRemaining();
     }
 
     public void stopTimer() {

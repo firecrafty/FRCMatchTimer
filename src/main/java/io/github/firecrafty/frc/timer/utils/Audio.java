@@ -23,24 +23,44 @@ package io.github.firecrafty.frc.timer.utils;
 
 import io.github.firecrafty.frc.timer.FRCMatchTimer;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 
 /**
  * @author firecrafty
  */
 public class Audio {
     public static synchronized void playSound(final String url) {
+        try {
+            Clip clip = AudioSystem.getClip();
+            AudioInputStream inputStream = AudioSystem.getAudioInputStream(FRCMatchTimer.class.getResource("/sounds/" + url));
+            clip.open(inputStream);
+            clip.start();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static synchronized void playSoundSequence(final String... urls) {
         new Thread(new Runnable() {
+            @Override
             public void run() {
-                try {
-                    Clip clip = AudioSystem.getClip();
-                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(FRCMatchTimer.class.getResourceAsStream("/sounds/" + url));
-                    clip.open(inputStream);
-                    clip.start();
-                } catch(Exception e) {
-                    e.printStackTrace();
+                byte[] buffer = new byte[4096];
+                for(String url : urls) {
+                    try {
+                        AudioInputStream is = AudioSystem.getAudioInputStream(FRCMatchTimer.class.getResource("/sounds/" + url));
+                        AudioFormat format = is.getFormat();
+                        SourceDataLine line = AudioSystem.getSourceDataLine(format);
+                        line.open(format);
+                        line.start();
+                        while(is.available() > 0) {
+                            int len = is.read(buffer);
+                            line.write(buffer, 0, len);
+                        }
+                        line.drain();
+                        line.close();
+                    } catch(Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }).start();

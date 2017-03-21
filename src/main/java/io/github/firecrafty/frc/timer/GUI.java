@@ -57,7 +57,8 @@ public class GUI extends JFrame {
     private MatchTimer matchTimer = new MatchTimer();
     private Counter counter = new Counter();
     private boolean startSoundPlayed;
-    private boolean teleSoundPlayed;
+    private boolean autoToTeleSoundPlayed;
+    private boolean startEndGameSoundPlayed;
     private boolean endSoundPlayed;
 
     private GUI() {
@@ -76,7 +77,7 @@ public class GUI extends JFrame {
             public void run() {
                 updateDisplay();
             }
-        }, 0, 200);
+        }, 0, 100);
     }
 
     private void addComponents() {
@@ -98,17 +99,23 @@ public class GUI extends JFrame {
         long[] timeRemaining = matchTimer.getTimeRemaining();
         //int seconds = (int)((remaining)% 1000);
         timeLabel.setText(format.format(timeRemaining[0]) + ":" + format.format(timeRemaining[1]));
-        if(soundCheck.isSelected()) {
-            if((timeRemaining[0] == 2 && timeRemaining[1] == 15) && (matchTimer.isUsingAutonomous() && !teleSoundPlayed)) {
-                Audio.playSound("start_tele.wav");
-                teleSoundPlayed = true;
-            }
-            if((timeRemaining[0] == 0 && timeRemaining[1] == 0) && !endSoundPlayed) {
-                Audio.playSound("end.wav");
-                endSoundPlayed = true;
+        if(matchTimer.getState() == State.RUNNING) {
+            if(soundCheck.isSelected()) {
+                if((timeRemaining[0] == 2 && timeRemaining[1] == 16) && (matchTimer.isUsingAutonomous() && !autoToTeleSoundPlayed)) {
+                    Audio.playSoundSequence("end_autonomous.wav", "start_tele.wav");
+                    autoToTeleSoundPlayed = true;
+                }
+                if((timeRemaining[0] == 0 && timeRemaining[1] == 30) && !startEndGameSoundPlayed) {
+                    System.out.println("Yo");
+                    Audio.playSound("start_end_game.wav");
+                    startEndGameSoundPlayed = true;
+                }
+                if((timeRemaining[0] == 0 && timeRemaining[1] == 0) && !endSoundPlayed) {
+                    Audio.playSound("end.wav");
+                    endSoundPlayed = true;
+                }
             }
         }
-
     }
 
     private void createButtonPanel() {
@@ -181,7 +188,7 @@ public class GUI extends JFrame {
                 updateCounters();
                 matchTimer.setState(State.RESET);
                 startSoundPlayed = false;
-                teleSoundPlayed = false;
+                autoToTeleSoundPlayed = false;
                 endSoundPlayed = false;
                 startStopButton.setText("Start");
             }
