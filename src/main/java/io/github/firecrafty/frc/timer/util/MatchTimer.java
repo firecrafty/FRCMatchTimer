@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.firecrafty.frc.timer.utils;
+package io.github.firecrafty.frc.timer.util;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @author firecrafty
  */
 public class MatchTimer {
+    private static MatchTimer instance_;
     boolean autonomous;
     Timer timer;
     State state = State.RESET;
@@ -39,7 +40,12 @@ public class MatchTimer {
     private long remaining = teleopOnlyDuration;
     private long lastUpdate;
 
-    public MatchTimer() {
+
+    public static MatchTimer getInstance() {
+        if(instance_ == null) instance_ = new MatchTimer();
+        return instance_;
+    }
+    private MatchTimer() {
         timer = new Timer(100, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -130,14 +136,17 @@ public class MatchTimer {
     }
 
     public void stopTimer() {
+        timer.stop(); // Stop the timer
         // Subtract elapsed time from the remaining time and stop timing
         long now = System.currentTimeMillis();
         remaining -= (now - lastUpdate);
-        timer.stop(); // Stop the timer
+        updateTimeRemaining();
     }
 
     public boolean isUsingAutonomous() {
         return autonomous;
     }
-
+    public boolean inAutonomous() {
+        return time[0] == 2 && time[1] > 15;
+    }
 }

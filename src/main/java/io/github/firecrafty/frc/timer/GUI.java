@@ -21,10 +21,10 @@
 
 package io.github.firecrafty.frc.timer;
 
-import io.github.firecrafty.frc.timer.utils.Audio;
-import io.github.firecrafty.frc.timer.utils.Counter;
-import io.github.firecrafty.frc.timer.utils.MatchTimer;
-import io.github.firecrafty.frc.timer.utils.State;
+import io.github.firecrafty.frc.timer.util.Audio;
+import io.github.firecrafty.frc.timer.util.MatchTimer;
+import io.github.firecrafty.frc.timer.util.ScoreKeeper;
+import io.github.firecrafty.frc.timer.util.State;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,7 +38,7 @@ import java.util.TimerTask;
  * @author firecrafty
  */
 public class GUI extends JFrame {
-    private static GUI instance_ = new GUI();
+    private static GUI instance_;
     NumberFormat format;
     JPanel mainPanel = new JPanel(new GridBagLayout());
     JLabel timeLabel = new JLabel();
@@ -48,14 +48,14 @@ public class GUI extends JFrame {
     JCheckBox soundCheck = new JCheckBox("Play match noises?");
     JButton resetButton = new JButton("Reset");
     JPanel helperPanel = new JPanel(new GridBagLayout());
-    JButton scoredGearButton = new JButton("Scored Gear");
-    JButton droppedGearButton = new JButton("Dropped Gear");
+    JButton scoredGearButton = new JButton("Scored Gear (You Suck Slightly Less)");
+    JButton droppedGearButton = new JButton("Dropped Gear (You suck!)");
     JTextField scoredGearField = new JTextField("0", 2);
     JTextField droppedGearField = new JTextField("0", 2);
     GridBagConstraints gbc = new GridBagConstraints();
     Timer timer = new Timer();
-    private MatchTimer matchTimer = new MatchTimer();
-    private Counter counter = new Counter();
+    private MatchTimer matchTimer = MatchTimer.getInstance();
+    private ScoreKeeper scoreKeeper = new ScoreKeeper();
     private boolean startSoundPlayed;
     private boolean autoToTeleSoundPlayed;
     private boolean startEndGameSoundPlayed;
@@ -99,21 +99,18 @@ public class GUI extends JFrame {
         long[] timeRemaining = matchTimer.getTimeRemaining();
         //int seconds = (int)((remaining)% 1000);
         timeLabel.setText(format.format(timeRemaining[0]) + ":" + format.format(timeRemaining[1]));
-        if(matchTimer.getState() == State.RUNNING) {
-            if(soundCheck.isSelected()) {
-                if((timeRemaining[0] == 2 && timeRemaining[1] == 16) && (matchTimer.isUsingAutonomous() && !autoToTeleSoundPlayed)) {
-                    Audio.playSoundSequence("end_autonomous.wav", "start_tele.wav");
-                    autoToTeleSoundPlayed = true;
-                }
-                if((timeRemaining[0] == 0 && timeRemaining[1] == 30) && !startEndGameSoundPlayed) {
-                    System.out.println("Yo");
-                    Audio.playSound("start_end_game.wav");
-                    startEndGameSoundPlayed = true;
-                }
-                if((timeRemaining[0] == 0 && timeRemaining[1] == 0) && !endSoundPlayed) {
-                    Audio.playSound("end.wav");
-                    endSoundPlayed = true;
-                }
+        if(matchTimer.getState() == State.RUNNING && soundCheck.isSelected()) {
+            if((timeRemaining[0] == 2 && timeRemaining[1] == 16) && (matchTimer.isUsingAutonomous() && !autoToTeleSoundPlayed)) {
+                Audio.playSoundSequence("end_autonomous.wav", "start_tele.wav");
+                autoToTeleSoundPlayed = true;
+            }
+            if((timeRemaining[0] == 0 && timeRemaining[1] == 30) && !startEndGameSoundPlayed) {
+                Audio.playSound("start_end_game.wav");
+                startEndGameSoundPlayed = true;
+            }
+            if((timeRemaining[0] == 0 && timeRemaining[1] == 0) && !endSoundPlayed) {
+                Audio.playSound("end.wav");
+                endSoundPlayed = true;
             }
         }
     }
@@ -172,19 +169,19 @@ public class GUI extends JFrame {
         scoredGearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                scoredGearField.setText(Integer.toString(counter.incrementGearsScored()));
+                scoredGearField.setText(Integer.toString(scoreKeeper.incrementGearsScored()));
             }
         });
         droppedGearButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                droppedGearField.setText(Integer.toString(counter.incrementGearsDropped()));
+                droppedGearField.setText(Integer.toString(scoreKeeper.incrementGearsDropped()));
             }
         });
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                counter.resetCounters();
+                scoreKeeper.resetCounters();
                 updateCounters();
                 matchTimer.setState(State.RESET);
                 startSoundPlayed = false;
@@ -208,11 +205,12 @@ public class GUI extends JFrame {
     }
 
     public void updateCounters() {
-        scoredGearField.setText(Integer.toString(counter.getGearsScored()));
-        droppedGearField.setText(Integer.toString(counter.getGearsDropped()));
+        scoredGearField.setText(Integer.toString(scoreKeeper.getGearsScored()));
+        droppedGearField.setText(Integer.toString(scoreKeeper.getGearsDropped()));
     }
 
     public static GUI getInstance() {
+        if(instance_ == null) instance_ = new GUI();
         return instance_;
     }
 

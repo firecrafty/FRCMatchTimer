@@ -1,5 +1,5 @@
 /*
- * Counter.java
+ * State.java
  *
  * This file is part of FRCMatchTimer (https://github.com/firecrafty/FRCMatchTimer)
  *
@@ -19,41 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.firecrafty.frc.timer.utils;
+package io.github.firecrafty.frc.timer.util;
 
 /**
  * @author firecrafty
  */
-public class Counter {
-    private int gearsScored = 0;
-    private int gearsDropped = 0;
-
-    public int getGearsScored() {
-        return gearsScored;
-    }
-
-    public int getGearsDropped() {
-        return gearsDropped;
-    }
-
-    public int incrementGearsScored() {
-        return ++gearsScored;
-    }
-
-    public int incrementGearsDropped() {
-        return ++gearsDropped;
-    }
-
-    public int decrementGearsScored() {
-        return --gearsScored;
-    }
-
-    public int decrementGearsDropped() {
-        return --gearsDropped;
-    }
-
-    public void resetCounters() {
-        gearsScored = 0;
-        gearsDropped = 0;
-    }
+public enum State {
+    RESET,
+    RUNNING,
+    STOPPED
 }

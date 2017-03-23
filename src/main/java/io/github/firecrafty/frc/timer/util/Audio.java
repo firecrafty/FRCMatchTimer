@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package io.github.firecrafty.frc.timer.utils;
+package io.github.firecrafty.frc.timer.util;
 
 import io.github.firecrafty.frc.timer.FRCMatchTimer;
 
