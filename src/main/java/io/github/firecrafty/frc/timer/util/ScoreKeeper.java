@@ -34,7 +34,7 @@ public class ScoreKeeper {
     private boolean climbed;
 
     public int getScore() {
-        return score;
+        return Airship.getRotorScore();
     }
 
     public int getGearsScored() {
@@ -46,10 +46,8 @@ public class ScoreKeeper {
     }
 
     public int incrementGearsScored() {
-        int previousGearsScored = gearsScored;
-        gearsScored++;
-
-        return gearsScored;
+        Airship.scoreGear();
+        return ++gearsScored;
     }
 
     public int incrementGearsDropped() {
@@ -82,34 +80,40 @@ public class ScoreKeeper {
 }
 
 class Airship {
-    private int gearsScoredInTeleop;
-    private int gearsScoredInAutonomous;
+    private static int gearsScoredInTeleop;
+    private static int gearsScoredInAutonomous;
 
-    public void scoreGear(boolean inAutonomous) {
+    public static void scoreGear() {
+        Rotor.addGear(false);
+        gearsScoredInTeleop++;
+    }
+    public static void scoreGear(boolean inAutonomous) {
+        Rotor.addGear(inAutonomous);
         if(inAutonomous) {
             gearsScoredInAutonomous++;
         } else {
             gearsScoredInTeleop++;
         }
-        for(Rotor rotor : Rotor.values()) {
-            if(!rotor.isSpinning()) {
-                rotor.addGear();
-                break;
-            }
-        }
     }
 
-    public int getGearsScored() {
+    public static int getGearsScored() {
         return gearsScoredInAutonomous + gearsScoredInAutonomous;
     }
 
-    private void getRotorScore() {
+    public static int getRotorScore() {
+        int score = 0;
         for(Rotor rotor : Rotor.values()) {
-            //if()
+            if(rotor.isSpinning()) {
+                score += 40;
+            }
+            if(rotor.inAuton()) {
+                score += 10;
+            }
         }
+        return score;
     }
 
-    public void reset() {
+    public static void reset() {
         gearsScoredInAutonomous = 0;
         gearsScoredInTeleop = 0;
         Rotor.resetAll();
@@ -120,22 +124,16 @@ class Airship {
 enum Rotor {
     ONE(1), TWO(2), THREE(4), FOUR(6);
 
-    final int TOTAL_ROTOR_GEARS;
-    int gearsRemaining;
-    boolean inAuton;
+    private final int TOTAL_ROTOR_GEARS;
+    private int gearsRemaining;
+    private boolean inAuton;
 
-    public static void addGear() {
-        for(Rotor rotor : Rotor.values()) {
-            if(!rotor.isSpinning()) {
-                rotor.addGearPrivate();
-                break;
-            }
-        }
-    }
+
     public static void addGear(boolean inAuton) {
         for(Rotor rotor : Rotor.values()) {
             if(!rotor.isSpinning()) {
                 rotor.addGearPrivate(inAuton);
+                break;
             }
         }
     }
@@ -153,6 +151,10 @@ enum Rotor {
 
     public boolean isSpinning() {
         return gearsRemaining == 0;
+    }
+
+    public boolean inAuton() {
+        return inAuton;
     }
 
     private void addGearPrivate() {

@@ -35,7 +35,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * @author firecrafty
+ * @author Ryan Blue
  */
 public class GUI extends JFrame {
     private static GUI instance_;
@@ -48,8 +48,8 @@ public class GUI extends JFrame {
     JCheckBox soundCheck = new JCheckBox("Play match noises?");
     JButton resetButton = new JButton("Reset");
     JPanel helperPanel = new JPanel(new GridBagLayout());
-    JButton scoredGearButton = new JButton("Scored Gear (You Suck Slightly Less)");
-    JButton droppedGearButton = new JButton("Dropped Gear (You suck!)");
+    JButton scoredGearButton = new JButton("Scored Gear");
+    JButton droppedGearButton = new JButton("Dropped Gear");
     JTextField scoredGearField = new JTextField("0", 2);
     JTextField droppedGearField = new JTextField("0", 2);
     GridBagConstraints gbc = new GridBagConstraints();

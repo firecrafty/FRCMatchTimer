@@ -24,7 +24,7 @@ package io.github.firecrafty.frc.timer;
 import javax.swing.*;
 
 /**
- * @author firecrafty
+ * @author Ryan Blue
  */
 public class FRCMatchTimer {
     public static GUI gui;

@@ -22,7 +22,7 @@
 package io.github.firecrafty.frc.timer.util;
 
 /**
- * @author firecrafty
+ * @author Ryan Blue
  */
 public enum State {
     RESET,
